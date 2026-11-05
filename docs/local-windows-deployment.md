@@ -11,14 +11,14 @@
 - 默认开启画面理解，使用智能采样，默认全片最多 60 帧，仍可在生成设置中调整。
 - 单集和批量生成默认输出原片截图与时间戳跳转链接，可在生成设置中关闭。
 - 云端转写支持 DashScope 原生文件转写，可使用 `qwen3-asr-flash-filetrans`，自动上传至阿里云临时存储、查询异步任务，并保留服务返回的句级时间轴。
-- 已完成的笔记可直接下载 PDF，保留中文、真实截图、表格和时间戳链接；使用本地渲染，不调用模型。公式目前保留为 LaTeX 原文，未复用网页 KaTeX 排版。
+- 已完成的笔记可直接下载 PDF，保留中文、真实截图、表格和时间戳链接；复用网页已有的 KaTeX 排版行内公式、独立公式、矩阵等，再通过本机浏览器打印。全程本地渲染，不调用模型或外网。错误或不受支持的公式显示提示并保留原文。
 - 修复设置子页面直接打开和刷新时跳回通用设置的问题。
 
 这不是多人或公网服务的鉴权方案。浏览器扩展、远程设备和自定义来源需要另行设计访问策略；不要为方便而直接放开任意来源。
 
 ## 环境
 
-Windows，Python 3.11、uv、Node.js 20 或更新版本、pnpm，以及 PATH 中可运行的 FFmpeg。
+Windows，Python 3.11、uv、Node.js 22 或更新版本、pnpm，以及 PATH 中可运行的 FFmpeg。PDF 导出需要已安装的 Microsoft Edge（Windows 通常自带）或 Google Chrome。
 
 所有以下命令均在仓库根目录执行。目录可以自行选择，启动脚本按自身位置查找文件。
 
@@ -64,6 +64,10 @@ pnpm install --frozen-lockfile --ignore-scripts
 pnpm exec vite build
 cd ..
 ```
+
+PDF 导出使用 `playwright-core` 控制独立的无界面浏览器，不会使用个人浏览器资料，也不自动下载浏览器。依次查找 Edge、Chrome 和已安装的 Playwright Chromium；特殊安装路径可通过启动 BiliNote 前设置 `BILINOTE_PDF_BROWSER` 指向浏览器可执行文件。Linux 容器等没有浏览器的环境可在前端目录运行 `pnpm exec playwright-core install --with-deps chromium`。升级时重新安装 `backend/requirements.txt` 和锁定的前端依赖，不能只替换前端 `dist`。
+
+公式支持 `$...$`、`$$...$$`、`\(...\)`、`\[...\]`，代码块和行内代码中的分隔符保持原样。KaTeX 支持常用数学 LaTeX，不执行任意 TeX 包；宏展开与公式长度有限制。字体和截图嵌入文档，页面脚本、外部资源请求及 KaTeX 受信任命令均关闭。
 
 ### 3. 启动和停止
 
