@@ -80,7 +80,7 @@ class OpenAISREndpointRequest(BaseModel):
 
 AVAILABLE_TRANSCRIBER_TYPES = [
     {"value": "fast-whisper", "label": "Faster Whisper（本地）"},
-    {"value": "openai-asr", "label": "openai 兼容 ASR（在线）"},
+    {"value": "openai-asr", "label": "云端音频转写"},
 ]
 
 WHISPER_MODEL_SIZES = ["tiny", "base", "small", "medium", "large-v3", "large-v3-turbo"]

@@ -40,7 +40,7 @@ _ASR_EDITABLE_FIELDS = (
 _SILENCE_FIELDS = ("silence_split", "silence_noise_db", "min_silence_seconds")
 
 # 接口风格：transcriptions=Whisper 风格 /audio/transcriptions；chat=chat/completions + input_audio
-ASR_API_STYLES = ("transcriptions", "chat")
+ASR_API_STYLES = ("transcriptions", "chat", "dashscope")
 
 
 def _as_bool(value, default: bool) -> bool:
@@ -216,7 +216,7 @@ class TranscriberConfigManager:
             raise ValueError("切割阈值必须大于 0")
 
         if str(endpoint.get("api_style") or "") not in ASR_API_STYLES:
-            raise ValueError("接口类型只能是 transcriptions 或 chat")
+            raise ValueError("接口类型只能是 transcriptions、chat 或 dashscope")
 
         try:
             if int(endpoint.get("max_speech_chunks")) <= 0:

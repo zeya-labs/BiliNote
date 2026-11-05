@@ -151,7 +151,7 @@ class UniversalGPT(GPT):
             extras=kwargs.get("extras"),
             # spec 008 ticket 02：OCR 辅助模式下截图指令换成编号占位符版本
             ocr_assist=bool(kwargs.get("ocr_assist")),
-            approved_shots=kwargs.get("approved_shots") or [],
+            approved_shots=kwargs.get("approved_shots"),
             # m04445 pivot：OCR 参考内容（q1：全部输出）。
             ocr_reference=kwargs.get("ocr_reference"),
         )

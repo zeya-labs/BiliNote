@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Copy, Download, FileText, ListTree } from 'lucide-react'
+import { Copy, Download, FileDown, FileText, ListTree } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { downloadNotePdf } from '@/services/note'
 import { readLatestMarkdown, type Task } from '@/store/taskStore'
 import { useI18n } from '@/ember/i18n/context'
 import { Button } from '@/ember/ui/Button'
@@ -29,6 +30,7 @@ type NotePanelProps = {
 export function NotePanel({ task }: NotePanelProps) {
   const { t } = useI18n()
   const [tab, setTab] = useState<ReaderTab>('note')
+  const [exportingPdf, setExportingPdf] = useState(false)
   const markdown = readLatestMarkdown(task?.markdown)
 
   const outline = markdown ? extractOutline(markdown) : []
@@ -52,6 +54,25 @@ export function NotePanel({ task }: NotePanelProps) {
     URL.revokeObjectURL(url)
   }
 
+  const downloadPdf = async () => {
+    if (!task?.id || task.status !== 'SUCCESS') return
+    setExportingPdf(true)
+    try {
+      const blob = await downloadNotePdf(task.id)
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = (task.audioMeta?.title || task.id || 'note').replace(/[\\/:*?"<>|]/g, '_') + '.pdf'
+      anchor.click()
+      // Give the browser time to start reading the download before releasing it.
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t('note.pdfFailed'))
+    } finally {
+      setExportingPdf(false)
+    }
+  }
+
   return (
     <div className="flex min-h-0 flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -65,7 +86,7 @@ export function NotePanel({ task }: NotePanelProps) {
           className="border-b-0"
         />
         {tab === 'note' && markdown ? (
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             <Button size="sm" variant="ghost" onClick={copyMarkdown}>
               <Copy className="size-3.5" />
               <span className="hidden sm:inline">{t('note.copyMarkdown')}</span>
@@ -73,6 +94,17 @@ export function NotePanel({ task }: NotePanelProps) {
             <Button size="sm" variant="ghost" onClick={downloadMarkdown}>
               <Download className="size-3.5" />
               <span className="hidden sm:inline">{t('note.download')}</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-label={t('note.downloadPdf')}
+              onClick={downloadPdf}
+              loading={exportingPdf}
+              disabled={task?.status !== 'SUCCESS'}
+            >
+              <FileDown className="size-3.5" />
+              <span>{t('note.downloadPdf')}</span>
             </Button>
           </div>
         ) : null}

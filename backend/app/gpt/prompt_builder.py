@@ -143,9 +143,9 @@ def generate_base_prompt(
 
 # 获取格式函数
 def get_format_function(format_type, ocr_assist=False, approved_shots=None):
-    # spec 008 ticket 02：截图格式在 OCR 辅助模式下换成「编号占位符」版本，
-    # 关闭时一字不改地走原来的 *Screenshot-[mm:ss] 契约。
-    if format_type == 'screenshot' and ocr_assist:
+    # 已判定画面使用编号占位符，独立于额外的 OCR 文字识别开关。
+    # None 保留旧调用方契约；空清单表示本次没有可插入的截图。
+    if format_type == 'screenshot' and (ocr_assist or approved_shots is not None):
         return get_ocr_assist_screenshot_format(approved_shots or [])
     format_map = {
         'toc': get_toc_format,

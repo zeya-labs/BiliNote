@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from zipfile import ZipFile
 
 import httpx
@@ -63,7 +63,7 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, Response, StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
 from starlette.background import BackgroundTask
 from starlette.concurrency import run_in_threadpool
@@ -2060,6 +2060,39 @@ def download_task_archives(data: BatchArchiveRequest):
         shutil.rmtree(temp_dir, ignore_errors=True)
         logger.exception("批量笔记归档导出失败")
         return R.error(f"批量笔记归档导出失败：{exc}", code=500)
+
+
+@router.get("/task_pdf/{task_id}")
+def download_task_pdf(task_id: str):
+    """Export a completed note as a PDF with local images and clickable links."""
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", task_id):
+        return R.error("任务标识无效", code=400)
+    result_path = Path(NOTE_OUTPUT_DIR) / f"{task_id}.json"
+    if not result_path.is_file():
+        return R.error("笔记不存在或尚未生成", code=404)
+    from app.services.note_pdf import NotePdfError, build_note_pdf
+
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+        markdown = result.get("markdown")
+        if not isinstance(markdown, str) or not markdown.strip():
+            return R.error("笔记内容为空，无法导出 PDF", code=404)
+        title = _result_title(result) or "视频笔记"
+        content = build_note_pdf(markdown, title, IMAGE_OUTPUT_DIR, image_base_url=IMAGE_BASE_URL)
+        filename = _safe_file_component(title, "note") + ".pdf"
+        return Response(
+            content,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": "attachment; filename=note.pdf; filename*=UTF-8''" + quote(filename),
+                "Cache-Control": "no-store",
+            },
+        )
+    except NotePdfError as exc:
+        return R.error(str(exc), code=400)
+    except Exception:
+        logger.exception("笔记 PDF 导出失败 task_id=%s", task_id)
+        return R.error("PDF 导出失败，请重试或检查笔记内容", code=500)
 
 
 @router.get("/task_archive/{task_id}")

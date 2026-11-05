@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export type OpenAIASRStyle = 'transcriptions' | 'chat'
+export type OpenAIASRStyle = 'transcriptions' | 'chat' | 'dashscope'
 
 export interface OpenAIASREndpoint {
   id: string

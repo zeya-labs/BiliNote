@@ -28,7 +28,7 @@ const formSchema = z
     video_url: z.string().optional(),
     platform: z.string().default('bilibili'),
     quality: z.enum(['fast', 'medium', 'slow']).default('medium'),
-    format: z.array(z.string()).default([]),
+    format: z.array(z.string()).default(() => [...DEFAULT_GENERATION_SETTINGS.format]),
     scene: z.string().default('life'),
     detail: z.string().default('detailed'),
     extras: z.string().optional(),
@@ -97,7 +97,7 @@ export function IntakeForm({ onMultiPart }: Props = {}) {
       frame_limit_mode: 'total',
       ocr_assist: 'global',
       grid_size: [2, 2],
-      format: [],
+      format: [...DEFAULT_GENERATION_SETTINGS.format],
     },
   })
 

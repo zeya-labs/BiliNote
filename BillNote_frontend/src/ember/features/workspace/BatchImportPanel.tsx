@@ -37,12 +37,11 @@ import {
 } from '@/services/note'
 
 /**
- * 批量默认设置（spec 020）：在共享面板的默认值上多勾三个格式开关 ——
- * 批量通常是要一份能直接读的成品，目录/跳转/总结是标配。
+ * 批量在共享输出格式上增加目录和总结，保留单集与批量一致的截图和跳转默认值。
  */
 const BATCH_DEFAULT_SETTINGS: GenerationSettings = {
   ...DEFAULT_GENERATION_SETTINGS,
-  format: ['toc', 'link', 'summary'],
+  format: ['toc', ...DEFAULT_GENERATION_SETTINGS.format, 'summary'],
 }
 const LARGE_BATCH_THRESHOLD = 20
 

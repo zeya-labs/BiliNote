@@ -74,6 +74,15 @@ const readArchiveError = async (response: Response, fallback: string): Promise<n
   throw new Error(fallback)
 }
 
+export const downloadNotePdf = async (taskId: string): Promise<Blob> => {
+  const base = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
+  const response = await fetch(`${base}/task_pdf/${encodeURIComponent(taskId)}`)
+  if (!response.ok || !(response.headers.get('Content-Type') || '').includes('application/pdf')) {
+    return readArchiveError(response, translate('note.pdfFailed'))
+  }
+  return response.blob()
+}
+
 export const downloadNoteArchive = async (taskId: string): Promise<Blob> => {
   const base = API_BASE.endsWith('/api') ? API_BASE : `${API_BASE}/api`
   const response = await fetch(`${base}/task_archive/${encodeURIComponent(taskId)}`)

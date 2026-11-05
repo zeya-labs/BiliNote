@@ -42,6 +42,7 @@ const SILENCE_KEYS = ['silence_split', 'silence_noise_db', 'min_silence_seconds'
 const STYLES = [
   { value: 'transcriptions', label: 'transcriptions (/audio/transcriptions)' },
   { value: 'chat', label: 'chat (chat/completions + input_audio)' },
+  { value: 'dashscope', label: 'DashScope Filetrans' },
 ]
 
 /**
@@ -177,7 +178,7 @@ export function TranscriberSection() {
                         {endpoint.base_url} · {endpoint.model}
                       </span>
                     </div>
-                    <Badge tone="neutral">{endpoint.api_style}</Badge>
+                    <Badge tone="neutral">{endpoint.api_style === 'dashscope' ? t('settings.transcriber.dashscope') : endpoint.api_style}</Badge>
                     {active ? (
                       <Badge tone="ember">
                         <Check className="size-3" />
@@ -326,7 +327,7 @@ function EndpointDialog({ endpoint, onDone }: { endpoint?: AsrEndpoint; onDone: 
         name: name.trim(),
         base_url: baseUrl.trim(),
         model: model.trim(),
-        api_style: style as 'transcriptions' | 'chat',
+        api_style: style,
         timeout: Number(timeout) || 600,
         chunk_size_mb: Number(chunkSizeMb) || 18,
         max_speech_chunks: Number(maxSpeechChunks) || 120,
@@ -374,8 +375,12 @@ function EndpointDialog({ endpoint, onDone }: { endpoint?: AsrEndpoint; onDone: 
         <Input id="asr-model" value={model} onChange={event => setModel(event.target.value)} />
       </Field>
       <Field label={t('settings.transcriber.style')} htmlFor="asr-style">
-        <Select id="asr-style" value={style} options={STYLES} onChange={event => setStyle(event.target.value as AsrEndpoint['api_style'])} />
+        <Select id="asr-style" value={style} options={STYLES.map(item => item.value === 'dashscope' ? { ...item, label: t('settings.transcriber.dashscope') } : item)} onChange={event => setStyle(event.target.value as AsrEndpoint['api_style'])} />
       </Field>
+
+      {style === 'dashscope' ? (
+        <p className="text-caption text-ink-soft">{t('settings.transcriber.dashscopeHint')}</p>
+      ) : null}
 
       <div className="flex flex-col gap-1 border-t border-line/70 pt-4">
         <span className="ember-overline text-ink-mute">{t('settings.transcriber.limits')}</span>

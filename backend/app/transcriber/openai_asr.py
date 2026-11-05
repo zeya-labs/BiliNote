@@ -1,11 +1,12 @@
 """OpenAI 兼容音频转写引擎（spec 003）。
 
-支持两种请求风格（端点级 ``api_style`` 二选一）：
+支持三种请求风格（端点级 ``api_style``）：
 
 * ``transcriptions``：``POST {base_url}/audio/transcriptions``（OpenAI Whisper / 硅基流动 /
   自建 whisper-server），``response_format`` 支持 ``verbose_json``；不支持时降级 ``json`` → ``text``；
 * ``chat``：``POST {base_url}/chat/completions`` + ``messages[].content[].input_audio``
-  （小米 MiMo ``mimo-v2.5-asr`` 等）。
+  （小米 MiMo ``mimo-v2.5-asr`` 等）；
+* ``dashscope``：DashScope 原生文件转写，临时上传后异步查询并保留真实时间轴。
 
 过大的音频**切割成多段分别转写再合并**（不再整段压缩）；阈值即端点上的 ``chunk_size_mb``。
 """
@@ -173,7 +174,7 @@ class OpenAIASRTranscriber(Transcriber):
         self.chunk_size_mb = float(chunk_size_mb or 18)
         self.name = name or base_url or "OpenAI 兼容 ASR"
         # transcriptions=Whisper 风格；chat=chat/completions + input_audio（MiMo 等）
-        self.api_style = api_style if api_style in ("transcriptions", "chat") else "transcriptions"
+        self.api_style = api_style if api_style in ("transcriptions", "chat", "dashscope") else "transcriptions"
         # 静音切片参数（仅 chat 风格用）
         self.max_speech_chunks = int(max_speech_chunks or _DEFAULT_SPEECH_MAX_CHUNKS)
         self.silence_noise_db = float(silence_noise_db or _DEFAULT_SILENCE_NOISE_DB)
@@ -217,6 +218,18 @@ class OpenAIASRTranscriber(Transcriber):
 
     @timeit
     def transcript(self, file_path: str) -> TranscriptResult:
+        if self.api_style == "dashscope":
+            from app.transcriber.dashscope_asr import DashScopeFiletransTranscriber
+
+            return DashScopeFiletransTranscriber(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                model=self.model,
+                timeout=self.timeout,
+                max_rpm=self.max_rpm,
+                progress_callback=getattr(self, "progress_callback", None),
+            ).transcript(file_path)
+
         client = build_openai_client(
             api_key=self.api_key,
             base_url=self.base_url,

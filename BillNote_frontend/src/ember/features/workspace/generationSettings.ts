@@ -32,7 +32,7 @@ export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
   quality: 'medium',
   scene: 'life',
   detail: 'detailed',
-  format: [],
+  format: ['link', 'screenshot'],
   extras: '',
   video_understanding: true,
   video_interval: 6,
