@@ -345,3 +345,11 @@ ffmpg*/
 /BillNote_frontend/tc.json
 /gs2.json
 /backend/app/db/bili_note.db
+
+# Local Windows deployment state and credentials
+/.runtime/
+/backend/.local-stop-token
+/backend/*.db-*
+/*.lnk
+/LOCAL-DEPLOYMENT.json
+/本机部署说明.txt

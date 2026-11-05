@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom'
 import { useCheckBackend } from '@/hooks/useCheckBackend'
 import { systemCheck } from '@/services/system'
 import { StartupScreen } from '@/ember/startup/StartupScreen'
@@ -67,10 +67,7 @@ export function EmberApp() {
                 </OnboardingGuard>
               }
             />
-            <Route path="/settings" element={<SettingsPage />}>
-              <Route index element={<Navigate to="general" replace />} />
-              <Route path="*" element={<Navigate to="general" replace />} />
-            </Route>
+            <Route path="/settings/*" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>

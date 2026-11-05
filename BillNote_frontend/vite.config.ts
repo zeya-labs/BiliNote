@@ -70,9 +70,9 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      host: '0.0.0.0',
+      host: '127.0.0.1',
       port: port,
-      allowedHosts: true, // 允许任意域名访问
+      allowedHosts: ['localhost', '127.0.0.1'], // 本机开发仅接受本机域名
       proxy: {
         '/api': {
           target: apiBaseUrl,

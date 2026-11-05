@@ -1,3 +1,7 @@
+> **本分支说明**：基于 [El1mir/BiliNote](https://github.com/El1mir/BiliNote) 的 Ember UI 版本，增加 Windows 本机正式界面运行入口、请求来源限制和密钥日志修复，默认开启智能抽帧画面理解，并修复设置页刷新导航。
+>
+> Windows 本机使用请优先阅读 **[本机部署说明](docs/local-windows-deployment.md)**。API 密钥、B站 Cookie、笔记和运行数据均不随代码提交。下方保留的上游在线产品、镜像和 Release 链接不代表本分支的发布包。
+
 <div style="display: flex; justify-content: center; align-items: center; gap: 10px;
 ">
     <p align="center">

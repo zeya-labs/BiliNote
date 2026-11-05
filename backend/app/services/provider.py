@@ -156,7 +156,7 @@ class ProviderService:
             # 如果用户未重新输入直接保存，带星号的值不应覆盖原 key。
             if 'api_key' in filtered_data and '*' in str(filtered_data.get('api_key', '')):
                 filtered_data.pop('api_key')
-            print('更新模型供应商',filtered_data)
+            # Local deployment: never log credentials or provider payloads.
             update_provider(id, **filtered_data)
             # 获取更新后的供应商信息
             updated_provider = get_provider_by_id(id)
